@@ -28,6 +28,7 @@ const App: React.FC = () => {
     const [privacyFilter, setPrivacyFilter] = useState<'all' | 'open' | 'closed'>('all');
     const [colorFilter, setColorFilter] = useState<string | null>(null);
     const [friendsFilter, setFriendsFilter] = useState(false);
+    const [openFriendsBlocks, setOpenFriendsBlocks] = useState<number[]>([]);
 
     useEffect(() => {
         fetchGroups();
@@ -69,6 +70,14 @@ const App: React.FC = () => {
     });
 
     const availableColors = Array.from(new Set(groups.map(group => group.avatar_color))).filter(Boolean);
+
+    const toggleFriendsBlock = (groupId: number) => {
+        if (openFriendsBlocks.includes(groupId)) {
+            setOpenFriendsBlocks(openFriendsBlocks.filter(id => id !== groupId));
+        } else {
+            setOpenFriendsBlocks([...openFriendsBlocks, groupId]);
+        }
+    };
 
     return (
         <div className="app">
@@ -132,14 +141,18 @@ const App: React.FC = () => {
                                     <p>Подписчиков: {group.members_count}</p>
                                     {group.friends && group.friends.length > 0 && (
                                         <div className="friends-toggle">
-                                            <p>Друзей: {group.friends.length}</p>
-                                            <ul>
-                                                {group.friends.map((friend, index) => (
-                                                    <li key={index}>
-                                                        {friend.first_name} {friend.last_name}
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                            <p onClick={() => toggleFriendsBlock(group.id)}>
+                                                Друзей (нажмите для подробностей): {group.friends.length}
+                                            </p>
+                                            {openFriendsBlocks.includes(group.id) && (
+                                                <ul>
+                                                    {group.friends.map((friend, index) => (
+                                                        <li key={index}>
+                                                            {friend.first_name} {friend.last_name}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
                                         </div>
                                     )}
                                 </div>
